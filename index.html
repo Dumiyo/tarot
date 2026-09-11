@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>欧式塔罗牌 · Tarot de Marseille</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    background: #1a1030;
+    background-image:
+      radial-gradient(circle at 20% 20%, #2a1a4a 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, #2a1a4a 0%, transparent 50%);
+    font-family: Georgia, "Times New Roman", serif;
+    color: #e8dcc0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+  }
+  h1 {
+    font-size: 2rem;
+    letter-spacing: 0.3em;
+    color: #d4af37;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    font-size: 0.85rem;
+    letter-spacing: 0.4em;
+    color: #8a7ba8;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+  }
+  .stage { perspective: 1000px; margin-bottom: 26px; }
+  .card {
+    width: 220px; height: 360px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.8s cubic-bezier(.4,.1,.2,1);
+  }
+  .card.flipped { transform: rotateY(180deg); }
+  .face {
+    position: absolute; inset: 0;
+    border-radius: 14px;
+    backface-visibility: hidden;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    border: 3px solid #d4af37;
+    box-shadow: 0 10px 40px rgba(0,0,0,.5);
+  }
+  .back { background: repeating-linear-gradient(45deg, #241540 0 8px, #2d1b52 8px 16px); }
+  .back .star { font-size: 64px; color: #d4af37; }
+  .back .ring {
+    width: 120px; height: 120px;
+    border: 2px solid #d4af37;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .front {
+    transform: rotateY(180deg);
+    background: linear-gradient(160deg, #f5ecd7 0%, #e8d9b5 100%);
+    color: #3a2a55;
+    padding: 18px;
+  }
+  .front .num { font-size: 0.8rem; letter-spacing: 0.3em; color: #8a6d1f; }
+  .front .glyph { font-size: 72px; margin: 14px 0; }
+  .front .name {
+    font-size: 1.3rem; font-weight: bold; color: #3a2a55;
+    border-top: 1px solid #b89a4a; border-bottom: 1px solid #b89a4a;
+    padding: 8px 0; margin-bottom: 8px;
+  }
+  .front .en {
+    font-size: 0.75rem; letter-spacing: 0.2em; color: #8a6d1f;
+    text-transform: uppercase; margin-bottom: 12px;
+  }
+  .front .meaning { font-size: 0.85rem; line-height: 1.6; text-align: center; color: #55447a; }
+  .draw-btn {
+    background: transparent; color: #d4af37;
+    border: 1px solid #d4af37;
+    padding: 14px 48px; font-size: 1rem;
+    letter-spacing: 0.3em; cursor: pointer;
+    font-family: inherit; transition: all .3s; border-radius: 4px;
+  }
+  .draw-btn:hover { background: #d4af37; color: #1a1030; }
+  .hint { margin-top: 16px; font-size: 0.8rem; color: #8a7ba8; letter-spacing: 0.1em; }
+  .history { display: flex; gap: 10px; margin-top: 28px; flex-wrap: wrap; justify-content: center; }
+  .history .mini {
+    width: 44px; height: 72px; border-radius: 6px;
+    border: 1px solid #d4af37; background: #f5ecd7;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; box-shadow: 0 3px 10px rgba(0,0,0,.4);
+  }
+</style>
+</head>
+<body>
+  <h1>欧式塔罗牌</h1>
+  <div class="subtitle">Tarot &middot; Divination</div>
+
+  <div class="stage">
+    <div class="card" id="card">
+      <div class="face back">
+        <div class="ring"><span class="star">&#10022;</span></div>
+      </div>
+      <div class="face front" id="front">
+        <div class="num" id="cNum">XXI</div>
+        <div class="glyph" id="cGlyph">&#9788;</div>
+        <div class="name" id="cName">世界</div>
+        <div class="en" id="cEn">The World</div>
+        <div class="meaning" id="cMeaning">点击下方按钮，抽取属于你的今日牌面</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="draw-btn" onclick="drawCard()">抽 牌</button>
+  <div class="hint">静心默念你的问题，再抽取一张牌</div>
+  <div class="history" id="history"></div>
+
+<script>
+  const cards = [
+    { num: "0",    glyph: "&#9785;", name: "愚者",   en: "The Fool",       mean: "正位：新的开始，无忧无虑的冒险精神。" },
+    { num: "I",    glyph: "&#9878;", name: "魔术师", en: "The Magician",   mean: "正位：创造力与行动力，万事俱备。" },
+    { num: "II",   glyph: "&#9787;", name: "女祭司", en: "The High Priestess", mean: "正位：直觉与智慧，倾听内心的声音。" },
+    { num: "III",  glyph: "&#9812;", name: "女皇",   en: "The Empress",    mean: "正位：丰饶与爱，收获的季节即将到来。" },
+    { num: "IV",   glyph: "&#9819;", name: "皇帝",   en: "The Emperor",    mean: "正位：稳定与权威，掌控自己的命运。" },
+    { num: "VI",   glyph: "&#9829;", name: "恋人",   en: "The Lovers",     mean: "正位：真挚的感情，重要的选择与结合。" },
+    { num: "VII",  glyph: "&#9876;", name: "战车",   en: "The Chariot",    mean: "正位：胜利与前进，坚定意志终将成功。" },
+    { num: "VIII", glyph: "&#9814;", name: "力量",   en: "Strength",       mean: "正位：以柔克刚，内心的勇气胜过蛮力。" },
+    { num: "IX",   glyph: "&#128378;", name: "隐士", en: "The Hermit",     mean: "正位：独处与反思，答案在寂静中浮现。" },
+    { num: "X",    glyph: "&#9742;", name: "命运之轮", en: "Wheel of Fortune", mean: "正位：转机降临，命运的齿轮开始转动。" },
+    { num: "XI",   glyph: "&#9878;", name: "正义",   en: "Justice",        mean: "正位：公平与平衡，因果自有安排。" },
+    { num: "XIII", glyph: "&#9760;", name: "死神",   en: "Death",          mean: "正位：告别与重生，旧事终结，新篇开启。" },
+    { num: "XIV",  glyph: "&#128164;", name: "节制", en: "Temperance",     mean: "正位：调和与耐心，中庸之道最长久。" },
+    { num: "XVI",  glyph: "&#9757;", name: "高塔",   en: "The Tower",      mean: "正位：突如其来的改变，破而后立。" },
+    { num: "XVII", glyph: "&#10023;", name: "星星", en: "The Star",       mean: "正位：希望与灵感，黑暗之后的星光。" },
+    { num: "XVIII",glyph: "&#9789;", name: "月亮",   en: "The Moon",       mean: "正位：暧昧与不安，请直面潜意识的迷雾。" },
+    { num: "XIX",  glyph: "&#9788;", name: "太阳",   en: "The Sun",        mean: "正位：光明与喜悦，成功近在眼前。" },
+    { num: "XX",   glyph: "&#9758;", name: "审判",   en: "Judgement",      mean: "正位：觉醒与召唤，是时候做出决断了。" },
+    { num: "XXI",  glyph: "&#9788;", name: "世界",   en: "The World",      mean: "正位：圆满与达成，一段旅程的完美终点。" }
+  ];
+  let last = -1;
+
+  function drawCard() {
+    let i;
+    do { i = Math.floor(Math.random() * cards.length); } while (i === last && cards.length > 1);
+    last = i;
+    const c = cards[i];
+    const card = document.getElementById("card");
+    card.classList.remove("flipped");
+
+    setTimeout(() => {
+      document.getElementById("cNum").textContent = c.num;
+      document.getElementById("cGlyph").innerHTML = c.glyph;
+      document.getElementById("cName").textContent = c.name;
+      document.getElementById("cEn").textContent = c.en;
+      document.getElementById("cMeaning").textContent = c.mean;
+      card.classList.add("flipped");
+      addHistory(c.glyph, c.name);
+    }, 400);
+  }
+
+  function addHistory(glyph, name) {
+    const h = document.getElementById("history");
+    const m = document.createElement("div");
+    m.className = "mini";
+    m.title = name;
+    m.innerHTML = glyph;
+    h.prepend(m);
+    while (h.children.length > 8) h.removeChild(h.lastChild);
+  }
+</script>
+</body>
+</html>

@@ -19,6 +19,7 @@
     --stars:rgba(232,220,192,.25);
     --shadow:rgba(0,0,0,.55);
     --good:#9fe1cb; --bad:#f0b0b0;
+    --cw:clamp(84px, 25vw, 150px); /* 牌宽：随屏幕缩放，保证三张永远同一行 */
   }
   body.light{
     --bg:#f6eedd;
@@ -116,10 +117,10 @@
   }
   .draw-btn:hover{ background:var(--gold); color:var(--bg); box-shadow:0 0 24px rgba(212,175,55,.4); }
   .hint{ margin-top:12px; font-size:.82rem; color:var(--sub); letter-spacing:.08em; }
-  .cards-row{ display:flex; gap:28px; justify-content:center; flex-wrap:wrap; margin:26px 0 10px; }
+  .cards-row{ display:flex; gap:clamp(10px,2.5vw,28px); justify-content:center; flex-wrap:nowrap; margin:26px 0 10px; }
   .slot{ text-align:center; }
   .slot .label{ font-size:.84rem; color:var(--gold-soft); letter-spacing:.22em; margin-bottom:10px; }
-  .tcard{ width:150px; height:262px; perspective:900px; cursor:pointer; display:inline-block; }
+  .tcard{ width:var(--cw); height:calc(var(--cw)*1.747); perspective:900px; cursor:pointer; display:inline-block; flex:0 0 auto; }
   .tcard .inner{ width:100%; height:100%; position:relative; transform-style:preserve-3d; transition:transform 1.6s cubic-bezier(.35,.1,.2,1); }
   .tcard.flipped .inner{ transform:rotateY(180deg); }
   .tcard.reversed.flipped .inner{ transform:rotateY(180deg) rotate(180deg); }
@@ -130,11 +131,11 @@
     box-shadow:0 10px 26px var(--shadow);
   }
   .tback{ background:repeating-linear-gradient(45deg,var(--back1) 0 6px,var(--back2) 6px 12px); }
-  .tback span{ font-size:42px; color:var(--gold); border:1.5px solid var(--gold); border-radius:50%; width:68px; height:68px; line-height:68px; }
+  .tback span{ font-size:calc(var(--cw)*.27); color:var(--gold); border:1.5px solid var(--gold); border-radius:50%; width:46%; aspect-ratio:1; display:flex; align-items:center; justify-content:center; }
   .tfront{ transform:rotateY(180deg); background:var(--front-bg); }
   .tfront img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
   .tfront .nm{ position:absolute; bottom:0; left:0; right:0; background:rgba(20,12,40,.82); color:#f5ecd7; font-size:.78rem; letter-spacing:.12em; padding:5px 0; font-weight:bold; }
-  .card-desc{ width:172px; margin:12px auto 0; font-size:.78rem; line-height:1.6; color:var(--text); text-align:center; }
+  .card-desc{ width:calc(var(--cw) + 14px); margin:12px auto 0; font-size:.78rem; line-height:1.6; color:var(--text); text-align:center; }
   .card-desc b{ color:var(--gold); }
   .rev-tag{ display:inline-block; margin-top:2px; padding:1px 8px; border:1px solid var(--sub); border-radius:10px; font-size:.7rem; color:var(--sub); }
 
@@ -176,7 +177,7 @@
     will-change:transform;
   }
   .fcard.chosen{ opacity:0; pointer-events:none; z-index:5; }
-  .picked-row{ position:relative; z-index:30; display:flex; gap:22px; margin-top:10px; min-height:262px; flex-wrap:wrap; justify-content:center; }
+  .picked-row{ position:relative; z-index:30; display:flex; gap:clamp(10px,2.5vw,22px); margin-top:10px; min-height:calc(var(--cw)*1.747 + 34px); flex-wrap:nowrap; justify-content:center; }
   .picked-row .slot{ position:relative; z-index:31; }
   #flipZone{ position:relative; z-index:31; }
   .flip-btn{
@@ -515,7 +516,6 @@
     "风风":"思绪高速运转：点子很多，记得挑一个落地。",
     "土土":"现实基石双重加固：稳，但别让稳妥变成原地踏步。"
   };
-
   /* ================= 数据：小阿卡纳 56 张 ================= */
   const suits = [
     { cn:"权杖", dir:"wands",  el:"火", theme:"行动与激情", up:"行动力旺盛、热情高涨", rev:"冲动急躁、热情倦怠" },
